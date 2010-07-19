@@ -29,6 +29,7 @@ On OSX you may have to install libffi, you can install it via MacPorts with:
 * Source hosted at {GitHub}[http://github.com/jnicklas/capybara].
 * Please direct questions, discussions at the {mailing list}[http://groups.google.com/group/ruby-capybara].
 * Report issues on {GitHub Issues}[http://github.com/jnicklas/capybara/issues]
+* Instructions for running the specs are at the bottom of this file!
 
 Pull requests are very welcome! Make sure your patches are well tested, Capybara is
 a testing tool after all. Please create a topic branch for every separate change
@@ -435,3 +436,21 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+== Setting up a development environment
+
+If you want to run the Capybara specs, please follow the following steps:
+
+Make Capybara use a separate gemset (optional):
+
+    rvm --create use default@capybara
+    cd .
+
+Install bundler and run it:
+
+    gem install bundler --pre
+    bundle install
+
+Run the specs:
+
+    bundle exec rake spec

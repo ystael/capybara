@@ -1,9 +1,11 @@
 $:.unshift(File.expand_path('../lib', File.dirname(__FILE__)))
 $:.unshift(File.dirname(__FILE__))
 
-require 'rubygems'
-require 'spec'
-require 'spec/autorun'
+require "rubygems"
+require "bundler"
+Bundler.setup
+Bundler.require(:default, :development)
+
 require 'capybara'
 require 'capybara/spec/driver'
 require 'capybara/spec/session'

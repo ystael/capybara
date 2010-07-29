@@ -37,60 +37,53 @@ module Capybara
         has_no_xpath?(XPath.from_css(path), options)
       end
 
-      def has_content?(content)
-        has_xpath?(XPath.content(content))
+      class Matcher
+        def expression(&block)
+          @expression = block if block
+          @expression
+        end
+
+        def failure_message(&block)
+          @failure_message = block if block
+          @failure_message
+        end
+
+        def negative_failure_message(&block)
+          @negative_failure_message = block if block
+          @negative_failure_message
+        end
       end
 
-      def has_no_content?(content)
-        has_no_xpath?(XPath.content(content))
+      def self.matcher(name, &block)
+        get_matcher = lambda do |*args|
+          matcher = Matcher.new
+          matcher.instance_exec(*args, &block) if block
+          matcher.expression { XPath.send(name, *args) } unless matcher.expression
+          matcher
+        end
+        define_method(:"has_#{name}?") do |*args|
+          has_xpath?(get_matcher[*args].expression.call)
+        end
+        define_method(:"has_no_#{name}?") do |*args|
+          has_no_xpath?(get_matcher[*args].expression.call)
+        end
       end
 
-      def has_link?(locator)
-        has_xpath?(XPath.link(locator))
+      matcher :content
+      matcher :link
+      matcher :button
+      matcher :field
+      matcher :table do |locator, options|
+        expression { XPath.table(locator, options || {}) }
       end
-
-      def has_no_link?(locator)
-        has_no_xpath?(XPath.link(locator))
+      matcher :select do |locator, options|
+        expression { XPath.select(locator, options || {}) }
       end
-
-      def has_button?(locator)
-        has_xpath?(XPath.button(locator))
+      matcher :unchecked_field do |locator|
+        expression { XPath.field(locator, :unchecked => true) }
       end
-
-      def has_no_button?(locator)
-        has_no_xpath?(XPath.button(locator))
-      end
-
-      def has_field?(locator, options={})
-        has_xpath?(XPath.field(locator, options))
-      end
-
-      def has_no_field?(locator, options={})
-        has_no_xpath?(XPath.field(locator, options))
-      end
-
-      def has_checked_field?(locator)
-        has_xpath?(XPath.field(locator, :checked => true))
-      end
-
-      def has_unchecked_field?(locator)
-        has_xpath?(XPath.field(locator, :unchecked => true))
-      end
-
-      def has_select?(locator, options={})
-        has_xpath?(XPath.select(locator, options))
-      end
-
-      def has_no_select?(locator, options={})
-        has_no_xpath?(XPath.select(locator, options))
-      end
-
-      def has_table?(locator, options={})
-        has_xpath?(XPath.table(locator, options))
-      end
-
-      def has_no_table?(locator, options={})
-        has_no_xpath?(XPath.table(locator, options))
+      matcher :checked_field do |locator|
+        expression { XPath.field(locator, :checked => true) }
       end
     end
   end

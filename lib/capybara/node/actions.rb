@@ -9,9 +9,9 @@ module Capybara
       #
       # @param [String] locator      Text, id or value of link or button
       #
-      def click_link_or_button(locator)
+      def click_link_or_button(locator, *rest)
         msg = "no link or button '#{locator}' found"
-        find(:xpath, XPath::HTML.link_or_button(locator), :message => msg).click
+        find(:xpath, XPath::HTML.link_or_button(locator), :message => msg).click(*rest)
       end
       alias_method :click_on, :click_link_or_button
 
@@ -22,9 +22,9 @@ module Capybara
       #
       # @param [String] locator      Text, id or text of link
       #
-      def click_link(locator)
+      def click_link(locator, *rest)
         msg = "no link with title, id or text '#{locator}' found"
-        find(:xpath, XPath::HTML.link(locator), :message => msg).click
+        find(:xpath, XPath::HTML.link(locator), :message => msg).click(*rest)
       end
 
       ##
@@ -33,9 +33,9 @@ module Capybara
       #
       # @param [String] locator      Text, id or value of button
       #
-      def click_button(locator)
+      def click_button(locator, *rest)
         msg = "no button with value or id or text '#{locator}' found"
-        find(:xpath, XPath::HTML.button(locator), :message => msg).click
+        find(:xpath, XPath::HTML.button(locator), :message => msg).click(*rest)
       end
 
       ##

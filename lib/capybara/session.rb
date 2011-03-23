@@ -141,8 +141,8 @@ module Capybara
     #
     # @param [String] url     The URL to navigate to
     #
-    def visit(url)
-      driver.visit(url)
+    def visit(url, *rest)
+      driver.visit(url, *rest)
     end
 
     ##

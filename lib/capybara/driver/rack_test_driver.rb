@@ -53,13 +53,13 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
       native.remove_attribute('selected')
     end
 
-    def click
+    def click(persistent_attributes = {})
       if tag_name == 'a'
         method = self["data-method"] || :get
-        driver.process(method, self[:href].to_s)
+        driver.process(method, self[:href].to_s, {}, persistent_attributes)
       elsif (tag_name == 'input' and %w(submit image).include?(type)) or
           ((tag_name == 'button') and type.nil? or type == "submit")
-        Form.new(driver, form).submit(self)
+        Form.new(driver, form).submit(self, persistent_attributes)
       end
     end
 
@@ -169,8 +169,8 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
       params
     end
 
-    def submit(button)
-      driver.submit(method, native['action'].to_s, params(button))
+    def submit(button, persistent_attributes = {})
+      driver.submit(method, native['action'].to_s, params(button), persistent_attributes)
     end
 
     def multipart?
@@ -199,15 +199,15 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
     @app = app
   end
 
-  def visit(path, attributes = {})
-    process(:get, path, attributes)
+  def visit(path, attributes = {}, persistent_attributes = {})
+    process(:get, path, attributes, persistent_attributes)
   end
 
-  def process(method, path, attributes = {})
+  def process(method, path, attributes = {}, persistent_attributes = {})
     return if path.gsub(/^#{request_path}/, '') =~ /^#/
     path = request_path + path if path =~ /^\?/
-    send(method, to_binary(path), to_binary( attributes ), env)
-    follow_redirects!
+    send(method, to_binary(path), to_binary( attributes.merge(persistent_attributes) ), env)
+    follow_redirects!(persistent_attributes)
   end
 
   def current_url
@@ -236,10 +236,10 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
     end
   end
 
-  def submit(method, path, attributes)
+  def submit(method, path, attributes, persistent_attributes = {})
     path = request_path if not path or path.empty?
-    send(method, to_binary(path), to_binary(attributes), env)
-    follow_redirects!
+    send(method, to_binary(path), to_binary(attributes.merge(persistent_attributes)), env)
+    follow_redirects!(persistent_attributes)
   end
 
   def find(selector)
@@ -264,11 +264,20 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
   def put(*args, &block); reset_cache; super; end
   def delete(*args, &block); reset_cache; super; end
 
-  def follow_redirects!
+  def follow_redirects!(persistent_attributes = {})
     5.times do
-      follow_redirect! if response.redirect?
+      follow_redirect!(persistent_attributes) if response.redirect?
     end
     raise Capybara::InfiniteRedirectError, "redirected more than 5 times, check for infinite redirects." if response.redirect?
+  end
+
+  # override original code from Rack::Test here to impose persistent_attributes arg
+  def follow_redirect!(persistent_attributes = {})
+    unless response.redirect?
+      raise Error.new("Last response was not a redirect. Cannot follow_redirect!")
+    end
+
+    get(response["Location"], to_binary(persistent_attributes))
   end
 
 private

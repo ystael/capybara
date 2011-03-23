@@ -89,8 +89,8 @@ module Capybara
       #
       # Click the Element
       #
-      def click
-        base.click
+      def click(*args)
+        base.click(*args)
       end
 
       ##
